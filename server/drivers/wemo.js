@@ -1,6 +1,6 @@
 var http = require('http');
 
-function GetStatus(addr) {
+function ToggleStatus(addr) {
 	var state = 'notset';
 
 	var body = '<?xml version="1.0" encoding="utf-8"?>\n' +
@@ -31,18 +31,19 @@ function GetStatus(addr) {
         res.on( "end", function( data ) { console.log('Return XML: ' + buffer );   
     
         if (buffer.indexOf("<BinaryState>1</BinaryState>") > -1) {
-            state = "On";
+            SetStatus(addr,0);
+            console.log('WeMo switch is on');
         }
         if (buffer.indexOf("<BinaryState>0</BinaryState>") > -1) {
-            state = "Off";
-        };    
-        console.log(state);
+            SetStatus(addr,1);
+            console.log('WeMo switch is off');
+        };
         return state;
         }); 
     });
     
     req.on('error', function(e) {
-        console.log('problem with request: ' + e.message);
+        console.log('Problem with request: ' + e.message);
         return e;
     });
       
@@ -50,15 +51,7 @@ function GetStatus(addr) {
     req.end();
 }
 
-function SetStatus(addr) {
-    var status = GetStatus(addr);
-    var state;
-	if (status === 'On') {
-        state = 0;
-    }
-    if (status === 'Off') {
-        state = 1;
-    };
+function SetStatus(addr,state) {
 
 	var body = '<?xml version="1.0" encoding="utf-8"?>\n' +
                 '<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">\n' +
@@ -84,10 +77,10 @@ function SetStatus(addr) {
     
     var req = http.request( postRequest, function( res )    {
     
-        console.log( res.statusCode );
+        console.log('HTTP Return Code: ' + res.statusCode );
         var buffer = "";
         res.on( "data", function( data ) { buffer = buffer + data; } );
-        res.on( "end", function( data ) { console.log( buffer );
+        res.on( "end", function( data ) { console.log('Return XML:' + buffer );
             console.log('Switch state changed to: ' + state);
         });
     
@@ -100,5 +93,4 @@ function SetStatus(addr) {
     req.write( body );
     req.end();
 }
-GetStatus('192.168.0.26');
-SetStatus("192.168.0.26");
+ToggleStatus('192.168.0.26')
