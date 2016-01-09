@@ -93,4 +93,4 @@ function SetStatus(addr,state) {
     req.write( body );
     req.end();
 }
-ToggleStatus('192.168.0.26')
+//ToggleStatus('192.168.0.26')
